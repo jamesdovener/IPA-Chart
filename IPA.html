@@ -1,0 +1,666 @@
+
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, user-scalable=no">
+
+<title>IPA Chart</title>
+
+<style type="text/css">
+	@font-face {
+		font-family: CustomIPA;
+		src: url('dejavusans-ipa.ttf') format("truetype");
+	}
+	.IPA {
+		font-family: CustomIPA, "DejaVu Sans", "Arial Unicode MS", "Lucida Sans Unicode", sans-serif;
+	}
+	body {
+		font-family: sans-serif;
+		text-align: center;
+	}
+	h2 {
+		text-align: center;
+		margin: 1em 0 0 0;
+	}
+	.text h1, .text h2 {
+		margin: 0.25em 0;
+		text-align: left;
+	}
+	.nowrap {
+		white-space: nowrap;
+	}
+	.problem {
+		background-color: #faa;
+		border: 1px solid #f00;
+		padding: 0 1em;
+		margin: 1em auto;
+		max-width: 37em;
+	}
+	.text {
+		background-color: #cfc;
+		border: 1px solid #bdb;
+		padding: 0 1em;
+		margin: 1em auto;
+		max-width: 37em;
+		text-align: left;
+	}
+	#object {
+		display: none;
+		margin: 1em 0;
+		padding: 0;
+		text-align: center;
+		height: 2em;
+	}
+	#object object {
+		margin: 0;
+		padding: 0;
+		width: 20em;
+		height: 3em;
+	}
+	#noaudio {
+		display: none;
+	}
+
+	.at, .ct, .rt {
+		text-align: center;
+		margin: 0.2em auto 0.1em auto;
+		border-spacing: 0.15em;
+	}
+	.at {
+		width: 49em;
+	}
+	.at td, .at th {
+		vertical-align: middle;
+	}
+	.at th {
+		line-height: 100%;
+		padding: 0.15em;
+	}
+	.at td {
+		width: 1.5em;
+		height: 1.5em;
+		padding: 0.1em;
+		line-height: 1.3em;
+	}
+	.at tr:nth-child(1) td:nth-child(1) {
+		background-color: white !important;
+		min-width: 10em;
+	}
+	.at tr th:nth-child(even), .at tr .interactive:nth-child(4n+2), .at tr .interactive:nth-child(4n+3), .ct td, .rt td {
+		background-color: #ccffc1;
+	}
+	.at tr th:nth-child(odd), .at tr .interactive:nth-child(4n+4), .at tr .interactive:nth-child(4n+1), .ct th, .rt th, .vowels .interactive {
+		background-color: #6f4;
+	}
+	.at td, .ct .blank {
+		background-color: #eeffea;
+	}
+	.interactive {
+		cursor: pointer;
+	}
+	.interactive:hover {
+		background-color: #22f !important;
+		color: #fff;
+	}
+	.at .extended:nth-child(even) {
+		padding-left: 3.85em !important;
+	}
+	.at .extended:nth-child(odd) {
+		padding-right: 3.85em !important;
+	}
+	.at .impossible {
+		background-color: #d2d2d2 !important;
+	}
+	.ct .IPA, .rt .IPA {
+		float: left;
+		display: block;
+		width: 2em;
+		text-align: center;
+	}
+	.nofloat {
+		float: none !important;
+		display: inline !important;
+		width: auto !important;
+		text-align: inherit !important;
+	}
+	.ct td, .rt td {
+		padding: 0.2em 1em 0.2em 0.2em;
+		text-align: left;
+		line-height: 1.5em;
+		white-space: nowrap;
+	}
+	.ct .IPA, .rt .IPA {
+		font-size: 1.3em;
+	}
+	.ct {
+		width: 35em;
+	}
+	.overflow, .twins, .voweloverflow {
+		overflow-x: auto;
+		overflow-y: hidden;
+	}
+	.voweloverflow {
+		position: relative;
+		max-width: 38em;
+		margin: 1.5em auto 0.1em auto;
+	}
+	.vowels {
+		position: relative;
+		width: 35em;
+		margin: 0 0 0 1.5em;
+	}
+	.vowels .trapezoid {
+		position: absolute:
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+	}
+	.vowels .v {
+		width: 14%;
+		text-align: center;
+		position: absolute;
+	}
+	.vowels .close_front {
+		top: 4%;
+		left: 4%;
+	}
+	.vowels .close_central {
+		top: 4%;
+		left: 44%;
+	}
+	.vowels .close_back {
+		top: 4%;
+		left: 84%;
+	}
+	.vowels .nearclose_nearfront {
+		top: 18%;
+		left: 23%;
+	}
+	.vowels .nearclose_nearback {
+		top: 18%;
+		left: 71%;
+	}
+	.vowels .closemid_front {
+		top: 33%;
+		left: 18%;
+	}
+	.vowels .closemid_central {
+		top: 33%;
+		left: 51%;
+	}
+	.vowels .closemid_back {
+		top: 33%;
+		left: 84%;
+	}
+	.vowels .mid_central {
+		top: 47%;
+		left: 54%;
+	}
+	.vowels .openmid_front {
+		top: 61%;
+		left: 31%;
+	}
+	.vowels .openmid_central {
+		top: 61%;
+		left: 58%;
+	}
+	.vowels .openmid_back {
+		top: 61%;
+		left: 84%;
+	}
+	.vowels .nearopen_front {
+		top: 79%;
+		left: 34%;
+	}
+	.vowels .nearopen_central {
+		top: 73%;
+		left: 60%;
+	}
+	.vowels .open_front {
+		top: 90%;
+		left: 44%;
+	}
+	.vowels .open_back {
+		top: 90%;
+		left: 84%;
+	}
+	.vowels .interactive {
+		font-size: 1.3em;
+		padding: 0.3em;
+	}
+	.vowels .l {
+		position: absolute;
+		font-size: 90%;
+	}
+	.vowels .front {
+		top: -1.5em;
+		left: 7%;
+	}
+	.vowels .central {
+		top: -1.5em;
+		left: 45%;
+	}
+	.vowels .back {
+		top: -1.5em;
+		left: 87%;
+	}
+	.vowels .close {
+		top: 5%;
+		left: -1.5em;
+	}
+	.vowels .closemid {
+		top: 34%;
+		left: -1.5em;
+	}
+	.vowels .openmid {
+		top: 62%;
+		left: -1.5em;
+	}
+	.vowels .open {
+		top: 90%;
+		left: -1.5em;
+	}
+	.caption {
+		font-size: 90%;
+		text-align: center;
+		margin: 0.1em auto 0.2em auto;
+	}
+	.copyright {
+		font-size: 90%;
+		text-align: left;
+	}
+	.twins {
+		margin: 0;
+		padding: 0;
+		text-align: center;
+	}
+	.twin1, .twin2 {
+		margin: 0;
+		padding: 0;
+			display: -moz-inline-stack;
+			display: inline-block;
+			vertical-align: top;
+			margin: 5px;
+			zoom: 1;
+			*display: inline;
+	}
+</style>
+
+</head>
+
+
+
+
+<script>
+	// candidate mode:
+	//   show all symbols to start with (randomly ordered)
+	//   show one symbol at a time (randomly ordered)
+	//
+	// answer mode:
+	//   show symbols completed
+	//   show no completed symbols
+
+	function init() {
+		// Vowels
+		symbols = ["i", "y", "ɨ", "ʉ", "ɯ", "u", "ɪ", "ʏ", "ʊ", "e", "ø", "ɘ", "ɵ", "ɤ", "o", "ə", "ɛ", "œ", 
+			"ɜ", "ɞ", "ʌ", "ɔ", "æ", "ɐ", "a", "ɶ", "ɑ", "ɒ"];
+
+		num = symbols.length;
+
+		var row = document.getElementById("vrow");
+
+		while (num > 0) {
+			ran = Math.floor(Math.random() * num);
+
+			var x = row.insertCell(-1);
+			x.innerHTML = symbols[ran];
+			x.setAttribute("id", "V:" + symbols[ran]);
+			x.setAttribute("draggable", "true");
+			x.setAttribute("ondragstart", "drag(event)");
+
+			symbols.splice(ran, 1);
+			num--;
+		}
+
+		// Pulmonic constants
+		symbols = ["p", "b", "t", "d", "ʈ", "ɖ", "c", "ɟ", "k", "g", "q", "ɢ", "ʔ", "m", "ɱ", "n", "ɳ", "ɲ", "ŋ",
+			"ɴ", "ʙ", "r", "ʀ", "ⱱ", "ɾ", "ɽ", "ɸ", "β", "f", "v", "θ", "ð", "s", "z", "ʃ", "ʒ", "ʂ", "ʐ", "ç",
+			"ʝ", "x", "ɣ", "χ", "ʁ", "ħ", "ʕ", "h", "ɦ", "ɬ", "ɮ", "ʋ", "ɹ", "ɻ", "j", "ɰ", "l", "ɭ", "ʎ", "ʟ"];
+
+		num = symbols.length;
+
+		var row = document.getElementById("pcrow");
+
+		while (num > 0) {
+			ran = Math.floor(Math.random() * num);
+
+			var x = row.insertCell(-1);
+			x.innerHTML = symbols[ran];
+			x.setAttribute("id", "PC:" + symbols[ran]);
+			x.setAttribute("draggable", "true");
+			x.setAttribute("ondragstart", "drag(event)");
+
+			symbols.splice(ran, 1);
+			num--;
+		}
+
+		// Non-pulmonic constants
+		symbols = ["ʘ", "ɓ", "pʼ", "ǀ", "ɗ", "tʼ", "ǃ", "ʄ", "kʼ", "ǂ", "ɠ", "sʼ", "ǁ", "ʛ"];
+
+		num = symbols.length;
+
+		var row = document.getElementById("npcrow");
+
+		while (num > 0) {
+			ran = Math.floor(Math.random() * num);
+
+			var x = row.insertCell(-1);
+			x.innerHTML = symbols[ran];
+			x.setAttribute("id", "NPC:" + symbols[ran]);
+			x.setAttribute("draggable", "true");
+			x.setAttribute("ondragstart", "drag(event)");
+
+			symbols.splice(ran, 1);
+			num--;
+		}
+
+		// Other symbols, Affricates
+		symbols = ["ʍ", "w", "ɥ", "ʜ", "ʢ", "ʡ", "ɕ", "ʑ", "ɺ", "ɧ", "t͡s", "t͡ʃ", "t͡ɕ", "ʈ͡ʂ", "d͡z", "d͡ʒ", "d͡ʑ", "ɖ͡ʐ"];
+
+		num = symbols.length;
+
+		var row = document.getElementById("osarow");
+
+		while (num > 0) {
+			ran = Math.floor(Math.random() * num);
+
+			var x = row.insertCell(-1);
+			x.innerHTML = symbols[ran];
+			x.setAttribute("id", "OSA:" + symbols[ran]);
+			x.setAttribute("draggable", "true");
+			x.setAttribute("ondragstart", "drag(event)");
+
+			symbols.splice(ran, 1);
+			num--;
+		}
+	}
+
+	function allowDrop(ev) {
+		ev.preventDefault();
+	}
+
+	function drag(ev) {
+		ev.dataTransfer.setData("candidate_id", ev.target.id);
+	}
+
+	function drop(ev) {
+		ev.preventDefault();
+		var data = ev.dataTransfer.getData("candidate_id");
+
+		if (ev.target.id == document.getElementById(data).innerHTML) {
+			ev.target.innerHTML = document.getElementById(data).innerHTML;
+
+			document.getElementById(data).innerHTML = "&middot;";
+		}
+	}
+</script>
+
+<body onLoad="init()">
+
+<div class="text">
+	<h1>Interactive IPA Chart</h1>
+	<p>The <a href="https://en.wikipedia.org/wiki/International_Phonetic_Alphabet">IPA</a> is a set of symbols that linguists use to
+		describe the sounds of spoken languages. There is lots of variation in how these sounds are said depending on the language and
+		context. For example, in English voiceless plosives usually end with a puff of air called <em>aspiration</em>, but the voiceless
+		plosives on this page aren't aspirated.</p>
+</div>
+
+<noscript><div class="problem">
+	<p><strong>Sorry, you have JavaScript disabled or your web browser doesn't support it.</strong></p>
+	<p>This interactive chart won't work without JavaScript enabled. Please enable JavaScript or upgrade to a modern web browser.</p>
+</div></noscript>
+
+<h2>Vowels</h2>
+<p class="caption">Where symbols appear in pairs, the one to the right represents a rounded vowel.</p>
+<div class="voweloverflow">
+	<div class="vowels">
+		<img src="Blank_vowel_trapezoid.png" class="trapezoid">
+		<div class="l front">Front</div>
+		<div class="l central">Central</div>
+		<div class="l back">Back</div>
+		<div class="l close">Close</div>
+		<div class="l closemid">Close-mid</div>
+		<div class="l openmid">Open-mid</div>
+		<div class="l open">Open</div>
+		<div class="v close_front"><span class="interactive IPA" id='i' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='y' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v close_central"><span class="interactive IPA" id='ɨ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='ʉ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v close_back"><span class="interactive IPA" id='ɯ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='u' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v nearclose_nearfront"><span class="interactive IPA" id='ɪ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='ʏ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v nearclose_nearback"><span class="interactive IPA" id='ʊ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v closemid_front"><span class="interactive IPA" id='e' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='ø' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v closemid_central"><span class="interactive IPA" id='ɘ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='ɵ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v closemid_back"><span class="interactive IPA" id='ɤ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='o' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v mid_central"><span class="interactive IPA" id='ə' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v openmid_front"><span class="interactive IPA" id='ɛ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='œ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v openmid_central"><span class="interactive IPA" id='ɜ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='ɞ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v openmid_back"><span class="interactive IPA" id='ʌ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='ɔ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v nearopen_front"><span class="interactive IPA" id='æ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v nearopen_central"><span class="interactive IPA" id='ɐ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v open_front"><span class="interactive IPA" id='a' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='ɶ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+		<div class="v open_back"><span class="interactive IPA" id='ɑ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> <span class="interactive IPA" id='ɒ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span></div>
+	</div>
+</div>
+
+<br>
+
+<table class="ct"><!-- candidate table -->
+<tr id="vrow">
+</tr>
+</table>
+
+<h2>Pulmonic consonants</h2>
+<p class="caption">Where symbols appear in pairs, the one to the right represents a voiced consonant.</p>
+<p class="caption">Areas shaded grey indicate articulations judged impossible.</p>
+<div class="overflow">
+	<table class="at"><!-- at = articulation table -->
+	<tr>
+	<td></td>
+	<th colspan="2">Bi-<wbr>labial</th>
+	<th colspan="2">Labio-<wbr>dental</th>	
+	<th colspan="2">Den<wbr>tal</th>
+	<th colspan="2">Alve<wbr>olar</th>
+	<th colspan="2">Post-<wbr>alveolar</th>
+	<th colspan="2">Retro<wbr>flex</th>
+	<th colspan="2">Pala<wbr>tal</th>
+	<th colspan="2">Ve<wbr>lar</th>
+	<th colspan="2">Uvu<wbr>lar</th>
+	<th colspan="2">Phary<wbr>ngeal</th>
+	<th colspan="2">Glot<wbr>tal</th>
+	</tr>
+	<tr>
+	<th>Plosive</th>
+	<td class="interactive IPA" id='p' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='b' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td></td>
+	<td colspan="3" class="interactive extended IPA" id='t' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td colspan="3" class="interactive extended IPA" id='d' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ʈ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ɖ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='c' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ɟ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='k' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='g' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='q' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ɢ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td>
+	<td class="impossible"></td>
+	<td class="interactive IPA" id='ʔ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="impossible"></td>
+	</tr>
+	<tr>
+	<th>Nasal</th>
+	<td></td><td class="interactive IPA" id='m' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='ɱ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td colspan="3" class="extended"></td><td colspan="3" class="interactive extended IPA" id='n' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='ɳ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='ɲ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='ŋ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='ɴ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="impossible"></td><td class="impossible"></td><td class="impossible"></td><td class="impossible"></td>
+	</tr>
+	<tr>
+	<th>Trill</th>
+	<td></td><td class="interactive IPA" id='ʙ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td></td>
+	<td colspan="3" class="extended"></td><td colspan="3" class="interactive extended IPA" id='r' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td></td>
+	<td></td><td></td>
+	<td class="impossible"></td><td class="impossible"></td>
+	<td></td><td class="interactive IPA" id='ʀ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td></td>
+	<td class="impossible"></td><td class="impossible"></td>
+	</tr>
+	<tr>
+	<th>Tap or Flap</th>
+	<td></td><td></td>
+	<td></td><td class="interactive IPA" id='ⱱ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td colspan="3" class="extended"></td><td colspan="3" class="interactive extended IPA" id='ɾ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='ɽ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td></td>
+	<td class="impossible"></td><td class="impossible"></td>
+	<td></td><td></td>
+	<td></td><td></td>
+	<td class="impossible"></td><td class="impossible"></td>
+	</tr>
+	<tr>
+	<th>Fricative</th>
+	<td class="interactive IPA" id='ɸ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='β' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='f' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='v' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='θ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ð' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='s' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='z' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ʃ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ʒ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ʂ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ʐ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ç' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ʝ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='x' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ɣ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='χ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ʁ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ħ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ʕ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='h' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td class="interactive IPA" id='ɦ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	</tr>
+	<tr>
+	<th>Lateral Fricative</th>
+	<td class="impossible"></td><td class="impossible"></td><td class="impossible"></td><td class="impossible"></td>
+	<td colspan="3" class="interactive extended IPA" id='ɬ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td colspan="3" class="interactive extended IPA" id='ɮ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td></td>
+	<td></td><td></td>
+	<td></td><td></td>
+	<td></td><td></td>
+	<td class="impossible"></td><td class="impossible"></td><td class="impossible"></td><td class="impossible"></td>
+	</tr>
+	<tr>
+	<th>Approximant</th>
+	<td></td><td></td>
+	<td></td><td class="interactive IPA" id='ʋ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td colspan="3" class="extended"></td><td colspan="3" class="interactive extended IPA" id='ɹ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='ɻ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='j' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='ɰ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td></td>
+	<td></td><td></td>
+	<td class="impossible"></td><td class="impossible"></td>
+	</tr>
+	<tr>
+	<th>Lateral Approximant</th>
+	<td class="impossible"></td><td class="impossible"></td><td class="impossible"></td><td class="impossible"></td>
+	<td colspan="3" class="extended"></td><td colspan="3" class="interactive extended IPA" id='l' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='ɭ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='ʎ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td class="interactive IPA" id='ʟ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</td>
+	<td></td><td></td>
+	<td class="impossible"></td><td class="impossible"></td><td class="impossible"></td><td class="impossible"></td>
+	</tr>
+	</table>
+</div>
+
+<br>
+
+<table class="ct"><!-- candidate table -->
+<tr id="pcrow">
+</tr>
+</table>
+
+<h2>Non-pulmonic consonants</h2>
+<div class="overflow">
+	<table class="ct"><!-- ct = columns table -->
+	<tr><th>Clicks</th><th>Voiced implosives</th><th>Ejectives</th></tr>
+	<tr><td class="interactive"><span class="IPA" id='ʘ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Bilabial</td><td class="interactive"><span class="IPA" id='ɓ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Bilabial</td><td class="interactive"><span class="IPA" id='pʼ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Bilabial</td></tr>
+	<tr><td class="interactive"><span class="IPA" id='ǀ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Dental</td><td class="interactive"><span class="IPA" id='ɗ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Dental/alveolar</td><td class="interactive"><span class="IPA" id='tʼ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Dental/alveolar</td></tr>
+	<tr><td class="interactive"><span class="IPA" id='ǃ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> (Post)alveoalar</td><td class="interactive"><span class="IPA" id='ʄ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Palatal</td><td class="interactive"><span class="IPA" id='kʼ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Velar</td></tr>
+	<tr><td class="interactive"><span class="IPA" id='ǂ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Palatoalveolar</td><td class="interactive"><span class="IPA" id='ɠ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Velar</td><td class="interactive"><span class="IPA" id='sʼ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Alveolar fricative</td></tr>
+	<tr><td class="interactive"><span class="IPA" id='ǁ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Alveolar lateral</td><td class="interactive"><span class="IPA" id='ʛ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Uvular</td><td class="blank"><span class="IPA">ʼ</span> <em>etc&hellip;</em></td></tr>
+	</table>
+</div>
+
+<br>
+
+<table class="ct"><!-- candidate table -->
+<tr id="npcrow">
+</tr>
+</table>
+
+<div class="twins">
+	<div class="twin1">
+		<h2>Other symbols</h2>
+		<table class="rt"><!-- rt = rows table -->
+		<tr><td class="interactive"><span class="IPA" id='ʍ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiceless labial-velar fricative</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='w' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiced labial-velar approximant</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='ɥ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiced labial-palatal approximant</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='ʜ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiceless epiglottal fricative</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='ʢ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiced epiglottal fricative</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='ʡ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Epiglottal plosive</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='ɕ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiceless alveolo-palatal fricative</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='ʑ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiced alveolo-palatal fricative</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='ɺ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Alveolar lateral flap</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='ɧ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Simultaneous <span class="IPA nofloat">ʃ</span> and <span class="IPA nofloat">x</span></td></tr>
+		</table>
+	</div>
+	<div class="twin2">
+		<h2>Affricates</h2>
+		<table class="rt"><!-- rt = rows table -->
+		<tr><td class="interactive"><span class="IPA" id='t͡s' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiceless alveolar affricate</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='t͡ʃ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiceless palato-alveolar affricate</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='t͡ɕ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiceless alveolo-palatal affricate</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='ʈ͡ʂ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiceless retroflex affricate</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='d͡z' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiced alveolar affricate</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='d͡ʒ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiced post-alveolar affricate</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='d͡ʑ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiced alveolo-palatal affricate</td></tr>
+		<tr><td class="interactive"><span class="IPA" id='ɖ͡ʐ' ondrop="drop(event)" ondragover="allowDrop(event)">&#9679;</span> Voiceless retroflex affricate</td></tr>
+		</table>
+	</div>
+</div>
+
+<br>
+
+<table class="ct"><!-- candidate table -->
+<tr id="osarow">
+</tr>
+</table>
+
+<div class="text">
+	<p class="copyright"><a href="https://commons.wikimedia.org/wiki/File:Blank_vowel_trapezoid.png">Vowel trapezoid background</a> by User:Denelson83 on Wikimedia Commons.</p>
+</div>
+
+</html>
